@@ -235,5 +235,4 @@ curl -i -X POST http://localhost:8001/routes/{route_id}/plugins \
   --data config.ResourceIDs[]=resource-id-2 # # Optional if EnableRPTAuthorization is set to false
 ```
 #### Examples on how to configure Kong to use the plugin via Konga
-The screenshot contains an example on how to setup the plugin via Konga with all features toggled on.
-![](/Users/mihai.mihaila/Workspace/go-kong/docs/resources/konga_setup.png)
+This [screenshot](docs/resources/konga_setup.png) contains an example on how to setup the plugin via Konga with all features toggled on.
