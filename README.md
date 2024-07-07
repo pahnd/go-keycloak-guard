@@ -75,7 +75,7 @@ While it might work with other versions these are the versions i have tested the
 - The requester must convert this permission ticket into an RPT token, which is then used to gain access to the resource.
 - if set to true then the following options will be made mandatory
     - EnableAuth: Verifies the Authorization Bearer header
-    - ResourceIDs: List of resource ids. The resource ids are actually Keycloak Permissions that use Resources and Policies in order to determine if the client is authorized. You can use the name of the Permissions for this option.
+    - ResourceIDs: List of resource ids. 
 
 ### Combined Authorization Workflow
 
@@ -83,11 +83,11 @@ When both authorization methods are enabled, the plugin prioritizes the RPT work
 
 1. Authorization Token Missing or Invalid:
    - The plugin responds with a permission ticket.
-   - The client must exchange this permission ticket for an RPT token using the Keycloak Authorization API.
+   - The client can exchange this permission ticket for an RPT token using the Keycloak Authorization API or use an access token that has the correct permissions.
 2. Authorization Header Present:
    - The plugin checks the validity of the access token in the Authorization header.
    - If the access token is valid, it verifies whether the token is an RPT.
-   - If the token is not an RPT, the plugin falls back to the UMA Authorization workflow to validate permissions based on the predefined Resource(s), Scope(s), and Strategy.
+   - If the token is not an RPT, the plugin falls back to the UMA Authorization workflow to validate the permissions based on the predefined Resource(s), Scope(s), and Strategy.
 
 This is an example for the response body that will be returned if the Authorization Bearer header is missing or invalid:
 ```json
@@ -98,7 +98,7 @@ This is an example for the response body that will be returned if the Authorizat
 }
 ```
 
-If the permissionTicket key is present in the response then the requester has to generate an RPT. Or if the EnableUMAAuthorization is turned on then the requester will have to provide a valid access token.
+If the permissionTicket key is present in the response then the requester has to generate an RPT. Or if the EnableUMAAuthorization is turned on then the requester can also provide a valid access token.
 The RPT will have to be provided as an Authorization Bearer header.
 
 ### Key Features
@@ -236,3 +236,4 @@ curl -i -X POST http://localhost:8001/routes/{route_id}/plugins \
 ```
 #### Examples on how to configure Kong to use the plugin via Konga
 This [screenshot](docs/resources/konga_setup.png) contains an example on how to setup the plugin via Konga with all features toggled on.
+![Plugin configuration via konga](docs/resources/konga_setup.png)
