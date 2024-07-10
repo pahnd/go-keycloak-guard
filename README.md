@@ -58,7 +58,7 @@
       * [How to use](#how-to-use-2)
         * [Kong plugin configuration for the Role Based Authorization workflow](#kong-plugin-configuration-for-the-role-based-authorization-workflow)
         * [Obtain user access token (for user1, client2)](#obtain-user-access-token-for-user1-client2)
-      * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
+        * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
   * [Known issues:](#known-issues)
 <!-- TOC -->
 
@@ -474,7 +474,7 @@ The response will contain the access token:
 }
 ```
 
-#### Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)
+##### Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)
 
 ```bash
 curl --location 'http://kongHostname:8000/test' \
