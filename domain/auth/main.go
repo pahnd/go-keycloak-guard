@@ -100,7 +100,6 @@ func (a *Auth) VerifyRPT() (*response.MissingPermissionTicketResponse, error) {
 		return response.NewRPTResponse(permissionTicket), nil
 	}
 	a.Kong.Log.Info("Introspecting RPT token.")
-	a.Kong.Log.Info(fmt.Sprintf("AccessToken: %s", accessToken))
 	introspectedToken, err := a.IAMClient.Introspect(accessToken, contract.TokenTypeHintRPT)
 	if err != nil {
 		a.Kong.Log.Info(fmt.Sprintf("Failed to introspect RPT. Requesting permission ticket. Reason: %s", err.Error()))
