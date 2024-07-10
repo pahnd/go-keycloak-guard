@@ -7,6 +7,7 @@
   * [Authorization Methods Workflow](#authorization-methods-workflow)
     * [EnableUMAAuthorization](#enableumaauthorization)
     * [EnableRPTAuthorization](#enablerptauthorization)
+    * [EnableRoleBasedAuthorization](#enablerolebasedauthorization)
     * [Combined Authorization Workflow](#combined-authorization-workflow)
     * [Key Features](#key-features)
     * [Example Workflow](#example-workflow)
@@ -27,6 +28,37 @@
         * [Activate the keycloak-guard Plugin for the Service](#activate-the-keycloak-guard-plugin-for-the-service)
         * [Activate the keycloak-guard Plugin to a Specific Route](#activate-the-keycloak-guard-plugin-to-a-specific-route)
       * [Examples on how to configure Kong to use the plugin via Konga](#examples-on-how-to-configure-kong-to-use-the-plugin-via-konga)
+  * [Keycloak configuration](#keycloak-configuration)
+    * [EnableUMAAuthorization](#enableumaauthorization-1)
+      * [Create User example](#create-user-example)
+      * [Create Scope example](#create-scope-example)
+      * [Create Resource example](#create-resource-example)
+      * [Create Client Policy example](#create-client-policy-example)
+      * [Create Permission](#create-permission)
+      * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2)
+      * [How to use](#how-to-use)
+        * [Fetch the access token for the user:](#fetch-the-access-token-for-the-user)
+        * [Use the access token to make a request through kong.](#use-the-access-token-to-make-a-request-through-kong-)
+    * [EnableRPTAuthorization](#enablerptauthorization-1)
+      * [Create Scope example](#create-scope-example-1)
+      * [Create Resource example](#create-resource-example-1)
+      * [Create Client Policy example](#create-client-policy-example-1)
+      * [Create Permission](#create-permission-1)
+      * [How to use](#how-to-use-1)
+        * [Kong plugin configuration for the RPT workflow](#kong-plugin-configuration-for-the-rpt-workflow-)
+      * [Request the permission ticket](#request-the-permission-ticket)
+      * [Obtain the Client Credentials Token for "client2"](#obtain-the-client-credentials-token-for-client2)
+      * [Use the Client Credentials Token and the Permission ticket to obtain the RPT Token](#use-the-client-credentials-token-and-the-permission-ticket-to-obtain-the-rpt-token)
+      * [Use the RPT token to make authorized calls to client1 (through Kong)](#use-the-rpt-token-to-make-authorized-calls-to-client1-through-kong)
+    * [EnableRoleBasedAuthorization](#enablerolebasedauthorization-1)
+      * [Create User example](#create-user-example-1)
+      * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2-1)
+    * [Create a new role for client1](#create-a-new-role-for-client1)
+    * [Assign the newly created role to a user](#assign-the-newly-created-role-to-a-user)
+      * [How to use](#how-to-use-2)
+        * [Kong plugin configuration for the Role Based Authorization workflow](#kong-plugin-configuration-for-the-role-based-authorization-workflow)
+        * [Obtain user access token (for user1, client2)](#obtain-user-access-token-for-user1-client2)
+      * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
 <!-- TOC -->
 
 ## About
@@ -42,17 +74,18 @@ This document explains how to set up and use the Keycloak Guard plugin with Kong
 - Website: https://github.com/mihaiflorentin88
 
 ## Requirements
-While it might work with other versions these are the versions i have tested the plugin with:
+While it might work with other versions these are the versions I have tested the plugin with:
 - Golang: 1.22.4
 - Kong: 3.4.2
 - Konga: 0.14.9
+- Keycloak: 25.0.1
 
 ## File structure
 
 ```
 ├── cmd/ - Contains entry points. Can access both domain and infrastructure components.
 ├── docs/ - Documentation resources.
-├── domain/ - Contains domain components with the strict rule of never using external dependecies.
+├── domain/ - Contains domain components with the strict rule of never using external dependencies.
 ├── infrastructure/ - Contains logic for external clients like APIs or storage solutions.
 └── port/ - Contains Ports(Interfaces)/DTOs.
 ```
@@ -64,7 +97,7 @@ While it might work with other versions these are the versions i have tested the
 - It requires an access token.
 - It uses the provided Resource(s) and Scope(s) along with a defined Strategy.
 - The Strategy can be affirmative, consensus, or unanimous and is used to determine how permissions are validated.
-- if set to true then the following fields will be made mandatory
+- If set to true then the following fields will be made mandatory
   - EnableAuth: Verifies the Authorization Bearer header
   - Permissions: List of permissions. You can provide the permissions following this standard: ResourceName#ScopeName
   - Strategy: you can choose from one of these 3 options Strategy. This option determines how permissions are validated.
@@ -76,6 +109,16 @@ While it might work with other versions these are the versions i have tested the
 - if set to true then the following options will be made mandatory
     - EnableAuth: Verifies the Authorization Bearer header
     - ResourceIDs: List of resource ids. 
+
+### EnableRoleBasedAuthorization
+
+- This method verifies if the user has a specified role.
+- It requires the `Role` field to be specified.
+- It cannot be enabled simultaneously with `EnableRPTAuthorization` or `EnableUMAAuthorization`.
+- If set to true, the following fields will be made mandatory:
+    - EnableAuth: Verifies the Authorization Bearer header
+    - Role: The required role the user must have
+
 
 ### Combined Authorization Workflow
 
@@ -108,10 +151,10 @@ The RPT will have to be provided as an Authorization Bearer header.
 - Seamless Integration: Integrates both authorization methods seamlessly to provide flexible and robust security mechanisms.
 
 ### Example Workflow
-1. Request Without Authorization Token:
+1. Request without Authorization Token:
    - The client receives a permission ticket in the response.
    - The client must convert this ticket into an RPT token to access the resource.
-2. Request With Valid Access Token:
+2. Request with Valid Access Token:
    - The plugin introspects the token to check its validity and type.
    - If the token is not an RPT, the UMA Authorization workflow is used to validate permissions.
 
@@ -122,7 +165,7 @@ make compile # This only works if you have golang 1.22.4 installed on your syste
 make docker-compile # This uses a docker container to compile the binary
 ```
 By default, it compiles for linux on amd64 architecture.
-If you wish to compile for other platforms or architectures use one of the commands bellow (requires golang 1.22.4 installed) or you can modify the Makefile and use docker to compile it
+If you wish to compile for other platforms or architectures use one of the commands below (requires golang 1.22.4 installed) or you can modify the Makefile and use docker to compile it
 ```bash
 # Windows x86 64 bit
 go mod tidy && GOOS=windows GOARCH=amd64 go build -o bin//keycloak-guard-windows-amd64.exe main.go
@@ -157,7 +200,7 @@ export KONG_PLUGINS="bundled,keycloak-guard"
 
 #### Description
 
-schema.lua is a Lua script used in Kong plugins to define the configuration schema for the plugin. It plays a crucial role in validating and managing the plugin’s configuration settings. Here’s a concise explanation of its role:
+schema.lua is a Lua script used in Kong plugins to define the configuration schema for the plugin. It plays a crucial role in the validation and management of the plugin’s configuration settings. Here’s a concise explanation of its role:
 1. Define Configuration Structure: schema.lua specifies the structure of the configuration options that users can set for the plugin. This includes defining fields, their types, default values, and validation rules.
 2. Ensure Validity: It ensures that the configuration provided by the user is valid and meets the expected criteria before the plugin is executed. This validation helps prevent runtime errors due to incorrect configurations.
 3. Integration with Konga: When using Konga, a UI for managing Kong, schema.lua helps Konga understand the configuration options available for the plugin, allowing for a user-friendly interface to set and modify these options.
@@ -216,6 +259,8 @@ curl -i -X POST http://localhost:8001/services/example-service/plugins \
   --data config.EnableRPTAuthorization=true \ # Optional
   --data config.ResourceIDs[]=resource-id-1 \ # Optional if EnableRPTAuthorization is set to false
   --data config.ResourceIDs[]=resource-id-2 # # Optional if EnableRPTAuthorization is set to false
+  --data config.EnableRoleBasedAuthorization=true # Optional if EnableRoleBasedAuthorization is set to true then EnableAuth has to be set to true and a Role has to be added. Also both EnableUMAAuthorization and EnableRPTAuthorization need to be set to false
+  --data config.Role=role1 # Optional requires EnableRoleBasedAuthorization to be set to true
 ```
 
 ##### Activate the keycloak-guard Plugin to a Specific Route
@@ -233,7 +278,208 @@ curl -i -X POST http://localhost:8001/routes/{route_id}/plugins \
   --data config.EnableRPTAuthorization=true \ # Optional
   --data config.ResourceIDs[]=resource-id-1 \ # Optional if EnableRPTAuthorization is set to false
   --data config.ResourceIDs[]=resource-id-2 # # Optional if EnableRPTAuthorization is set to false
+  --data config.EnableRoleBasedAuthorization=true # Optional if EnableRoleBasedAuthorization is set to true then EnableAuth has to be set to true and a Role has to be added. Also both EnableUMAAuthorization and EnableRPTAuthorization need to be set to false
+  --data config.Role=role1 # Optional requires EnableRoleBasedAuthorization to be set to true
 ```
 #### Examples on how to configure Kong to use the plugin via Konga
 This [screenshot](docs/resources/konga_setup.png) contains an example on how to setup the plugin via Konga with all features toggled on.
 ![Plugin configuration via konga](docs/resources/konga_setup.png)
+
+## Keycloak configuration
+I will be using "client1" and "client2" in my examples. "client2" will be the client sending the requests to client1
+### EnableUMAAuthorization
+For this workflow to work, you will be required to have the following Keycloak configuration:
+1. **client2:**
+   - create an audience scope mapper
+2. **Realm:**
+   - create an active user or use an existing one.
+3. **client1:**
+   - a new scope
+   - a new resource
+   - a new client policy 
+   - a new permission 
+
+#### Create User example
+Create the user:
+![Create user](docs/resources/keycloak_create_user.png)
+Set the user password
+![Set user password](docs/resources/keycloak_set_user_password.png)
+#### Create Scope example
+![Create Scope](docs/resources/keycloak_create_scope.png)
+#### Create Resource example
+![Create Resource](docs/resources/keycloak_create_resource.png)
+#### Create Client Policy example
+![Create Client Policy](docs/resources/keycloak_create_client_policy.png)
+#### Create Permission
+![Create Permission](docs/resources/keycloak_create_permission.png)
+#### Create an Audience scope mapper for client2
+![Audience Scope Mapper](docs/resources/keycloak_audience_scope_mapper.png)
+#### How to use
+##### Fetch the access token for the user:
+```bash
+curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'client_id=client2' \
+--data-urlencode 'username=user1' \
+--data-urlencode 'password=userpassword' \
+--data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
+```
+##### Use the access token to make a request through kong. 
+The keycloak-gateway plugin has to be enabled and configured for this workflow.
+![UMA Authorization workflow plugin configuration](docs/resources/kong_plugin_configuration_for_uma_workflow.png)
+For more detailed setup and usage instructions, refer to the [Additional installation examples](#additional-installation-examples) section.
+```bash
+curl --location 'http://kong-hostname:8000/test' \
+--header 'Authorization: Bearer <accessToken>'
+```
+### EnableRPTAuthorization
+For this workflow to work, you will be required to have the following Keycloak configuration:
+1. **client1:**
+   - a new scope
+   - a new resource
+   - a new client policy
+   - a new permission
+
+#### Create Scope Example
+![Create Scope](docs/resources/keycloak_create_scope.png)
+#### Create Resource Example
+![Create Resource](docs/resources/keycloak_create_resource.png)
+#### Create Client Policy Example
+![Create Client Policy](docs/resources/keycloak_create_client_policy.png)
+#### Create Permission
+![Create Permission](docs/resources/keycloak_create_permission.png)
+#### How to use
+##### Kong plugin configuration for the RPT workflow 
+![RPT Workflow configuration](docs/resources/kong_plugin_configuration_for_rpt_workflow.png)
+#### Request the permission ticket
+Any call that doesn't have an active RPT token will return a response that will contain a permission ticket
+
+```bash
+curl --location 'http://kongHostname:8000/test'
+```
+
+The response status code will be 401 and the response body will be like in the example below:
+```json
+{
+    "message": "The request is missing the Requesting Party Token (RPT). Please obtain an RPT using the provided permission ticket.",
+    "code": 401,
+    "permissionTicket": "<permission_ticket>"
+}
+```
+#### Obtain the Client Credentials Token for "client2"
+```bash
+curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'client_id=client2' \
+--data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
+```
+The response should contain the Client Credentials token (access_token):
+```json
+{
+    "access_token": "<client_credentials_token>",
+    "expires_in": 86400,
+    "refresh_expires_in": 0,
+    "token_type": "Bearer",
+    "not-before-policy": 0,
+    "scope": "email profile"
+}
+```
+
+#### Use the Client Credentials Token and the Permission ticket to obtain the RPT Token
+```bash
+curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Bearer <client_credentials_token>' \
+--data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:uma-ticket' \
+--data-urlencode 'ticket=<permission_ticket>'
+```
+The response will contain the RPT token that will be used authorize further calls to our application (through kong).
+```json
+{
+    "upgraded": false,
+    "access_token": "<rpt_token>",
+    "expires_in": 86400,
+    "refresh_expires_in": 0,
+    "token_type": "Bearer",
+    "not-before-policy": 0
+}
+```
+#### Use the RPT token to make authorized calls to client1 (through Kong)
+```bash
+curl --location 'http://kongHostname:8000/test' \
+--header 'Authorization: Bearer <rpt_token>'
+```
+
+### EnableRoleBasedAuthorization
+For this workflow to work, you will be required to have the following Keycloak configuration:
+1. **Realm:**
+   - create an active user or use an existing one.
+2. **client1:**
+   - create a new role
+   - assign the new role to a username
+3. **client2:**
+   - create an audience scope mapper
+
+#### Create User example
+Create the user:
+![Create user](docs/resources/keycloak_create_user.png)
+Set the user password
+![Set user password](docs/resources/keycloak_set_user_password.png)
+
+#### Create an Audience scope mapper for client2
+![Audience Scope Mapper](docs/resources/keycloak_audience_scope_mapper.png)
+
+### Create a new role for client1
+![Create a role](docs/resources/keycloak_create_a_role.png)
+
+### Assign the newly created role to a user
+Role mapping tab for a user:
+![Role Mapping](docs/resources/keycloak_user_role_mapping_tab.png)
+Assign a role to that user:
+![Role Mapping](docs/resources/keycloak_assign_role_to_user.png)
+
+#### How to use
+##### Kong plugin configuration for the Role Based Authorization workflow
+- EnableAuth has to be enabled
+- EnableUMAAuthorization has to be disabled
+- EnableRPTAuthorization has to be disabled
+- EnableRoleBasedAuthorization has to be enabled
+- Role (field) has to contain the name for the role you want to allow access for (role1)
+![Kong Role Based CFG](docs/resources/kong_plugin_configuration_for_role_based_workflow.png)
+
+##### Obtain user access token (for user1, client2)
+```bash
+curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'client_id=client2' \
+--data-urlencode 'username=user1' \
+--data-urlencode 'password=userpassword' \
+--data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
+```
+The response will contain the access token:
+```json
+{
+    "access_token": "<access_token>",
+    "expires_in": 86400,
+    "refresh_expires_in": 86400,
+    "refresh_token": "<refresh_token>",
+    "token_type": "Bearer",
+    "not-before-policy": 0,
+    "session_state": "9f0c033d-d7cf-4b1b-ab64-d591ec04edc2",
+    "scope": "email profile"
+}
+```
+
+#### Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)
+
+```bash
+curl --location 'http://kongHostname:8000/test' \
+--header 'Authorization: Bearer <access_token>'
+```
+If the user (user1) has the required role (role1) then the plugin will allow you to make the request.
+
+## Known issues:
+1. The Konga application will not display the "details" information for the plugin's fields ( This is a issue with Konga not being maintained )

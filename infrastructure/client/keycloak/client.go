@@ -63,6 +63,7 @@ func (c *Client) Introspect(token, tokenTypeHint string) (*dto.Introspect, error
 	}
 
 	defer resp.Body.Close()
+
 	if resp.StatusCode < 200 && resp.StatusCode >= 300 {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {

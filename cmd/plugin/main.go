@@ -11,16 +11,18 @@ import (
 )
 
 type Config struct {
-	KeycloakURL            string
-	Realm                  string
-	ClientID               string
-	ClientSecret           string
-	EnableAuth             bool
-	EnableUMAAuthorization bool
-	EnableRPTAuthorization bool
-	Permissions            []string
-	Strategy               string
-	ResourceIDs            []string
+	KeycloakURL                  string
+	Realm                        string
+	ClientID                     string
+	ClientSecret                 string
+	EnableAuth                   bool
+	EnableUMAAuthorization       bool
+	EnableRPTAuthorization       bool
+	EnableRoleBasedAuthorization bool
+	Permissions                  []string
+	Strategy                     string
+	ResourceIDs                  []string
+	Role                         string
 }
 
 func New() interface{} {
@@ -34,16 +36,29 @@ func (c *Config) Access(kong *pdk.PDK) {
 	if !c.EnableAuth {
 		return
 	}
-	kong.Log.Info("Introspecting AUTH Token")
+	if c.EnableRoleBasedAuthorization && (c.EnableRPTAuthorization || c.EnableUMAAuthorization) {
+		r := response.NewErrorResponse("[KeycloakGuard] Conflict in configuration: RoleCheck cannot be used together with RPT or UMA authorization workflows.", 400)
+		kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
+		return
+	}
 	introspectedToken, err := a.VerifyAuth()
 	if err != nil && !c.EnableRPTAuthorization {
 		r := response.NewErrorResponse(err.Error(), 401)
 		kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
 		return
 	}
-	kong.Log.Info("DONE Introspecting AUTH Token")
+	if c.EnableRoleBasedAuthorization {
+		kong.Log.Info(fmt.Sprintf("Verifying if the user has role %s", c.Role))
+		if !introspectedToken.HasRole(c.ClientID, c.Role) {
+			msg := fmt.Sprintf("User does not have the required role - %s", c.Role)
+			kong.Log.Err(msg)
+			r := response.NewErrorResponse(msg, 400)
+			kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
+			return
+		}
+	}
 	if c.EnableUMAAuthorization && !c.EnableRPTAuthorization {
-		kong.Log.Info("Verifying UMA Authorization")
+		kong.Log.Info("WORKFLOW: UMA Authorization selected.")
 		err := a.VerifyUMA()
 		if err != nil {
 			r := response.NewErrorResponse(err.Error(), 401)
@@ -53,7 +68,7 @@ func (c *Config) Access(kong *pdk.PDK) {
 	}
 
 	if !c.EnableUMAAuthorization && c.EnableRPTAuthorization {
-		kong.Log.Info("Verifying RPT Authorization")
+		kong.Log.Info("WORKFLOW: RPT Authorization selected.")
 		r, err := a.VerifyRPT()
 		if r != nil {
 			kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
@@ -67,12 +82,11 @@ func (c *Config) Access(kong *pdk.PDK) {
 	}
 
 	if c.EnableUMAAuthorization && c.EnableRPTAuthorization {
+		kong.Log.Info("WORKFLOW: RPT and UMA Authorization selected.")
 		isRPT := false
-		kong.Log.Info("Introspecting RPT Token")
 		accessToken, err := a.GetAccessTokenFromHeader()
 		if err == nil {
 			introspectedRPT, err := a.IAMClient.Introspect(accessToken, contract.TokenTypeHintRPT)
-			kong.Log.Info("Finished introspecting RPT Token")
 			if err == nil && introspectedRPT.IsRPT() {
 				if introspectedToken == nil {
 					kong.Log.Info("Replaced introspected token")
@@ -82,27 +96,26 @@ func (c *Config) Access(kong *pdk.PDK) {
 			}
 		}
 		if isRPT {
-			kong.Log.Info("Verifying RPT")
+			kong.Log.Info("Access token is of type RPT.")
+			kong.Log.Info("WORKFLOW: RPT Authorization selected.")
 			r, err := a.VerifyRPT()
 			if r != nil {
-				kong.Log.Info("Verifying RPT FAILED")
 				kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
 				return
 			}
 			if err != nil {
-				kong.Log.Info(fmt.Sprintf("Verifying RPT FAILED. Error: %s", err.Error()))
 				r := response.NewErrorResponse(err.Error(), 401)
 				kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
 				return
 			}
-			kong.Log.Info("Done verifying RPT")
 		}
 		if !isRPT {
-			kong.Log.Info("Verifying UMA")
+			kong.Log.Info("Access token is NOT of type RPT.")
+			kong.Log.Info("WORKFLOW: UMA Authorization selected.")
 			err = a.VerifyUMA()
 			if err != nil {
 				kong.Log.Info(fmt.Sprintf("Verifying UMA FAILED. Error: %s", err.Error()))
-				kong.Log.Info("Verifying RPT")
+				kong.Log.Info("WORKFLOW: SWITCHING to RPT Authorization Workflow")
 				r, err := a.VerifyRPT()
 				if r != nil {
 					kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
@@ -113,10 +126,7 @@ func (c *Config) Access(kong *pdk.PDK) {
 					kong.Response.Exit(r.Code, r.ToJson(), map[string][]string{"Content-Type": {"application/json"}})
 					return
 				}
-				kong.Log.Info("Done verifying RPT")
 			}
-
-			kong.Log.Info("Done verifying UMA")
 
 		}
 	}

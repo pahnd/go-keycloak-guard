@@ -18,5 +18,4 @@ func main() {
 		log.Fatal("Failed to start plugin:", err)
 	}
 	log.Println("Plugin server started and listening on socket")
-
 }

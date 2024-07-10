@@ -26,3 +26,15 @@ docker-clean-up:
 	docker network prune -f
 	docker container prune -f
 	docker image prune -a -f
+
+release:
+	mkdir -p bin/linux_amd64
+	mkdir -p bin/linux_arm64
+	go mod tidy && GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64/keycloak-guard main.go
+	go mod tidy && GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64/keycloak-guard main.go
+	cp schema.lua bin/linux_amd64/schema.lua
+	cp schema.lua bin/linux_arm64/schema.lua
+	tar -cvzf bin/linux_amd64.tar.gz bin/linux_amd64
+	tar -cvzf bin/linux_arm64.tar.gz bin/linux_arm64
+	rm -rf bin/linux_amd64
+	rm -rf bin/linux_arm64

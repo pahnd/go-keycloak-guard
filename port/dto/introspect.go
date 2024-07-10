@@ -50,3 +50,15 @@ func (i *Introspect) IsRPT() bool {
 	}
 	return false
 }
+
+func (i *Introspect) HasRole(clientID, role string) bool {
+	if roles, ok := i.ResourceAccess[clientID]; ok {
+		for _, r := range roles.Roles {
+			if r == role {
+				return true
+			}
+		}
+	}
+	return false
+
+}
