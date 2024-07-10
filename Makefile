@@ -28,8 +28,6 @@ docker-clean-up:
 	docker image prune -a -f
 
 release:
-    rm -rf bin/linux_amd64.tar.gz
-    rm -rf bin/linux_arm64.tar.gz
 	mkdir -p bin/linux_amd64
 	mkdir -p bin/linux_arm64
 	go mod tidy && GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64/keycloak-guard main.go
