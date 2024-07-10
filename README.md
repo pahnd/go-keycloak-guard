@@ -46,10 +46,10 @@
       * [Create Permission](#create-permission-1)
       * [How to use](#how-to-use-1)
         * [Kong plugin configuration for the RPT workflow](#kong-plugin-configuration-for-the-rpt-workflow-)
-      * [Request the permission ticket](#request-the-permission-ticket)
-      * [Obtain the Client Credentials Token for "client2"](#obtain-the-client-credentials-token-for-client2)
-      * [Use the Client Credentials Token and the Permission ticket to obtain the RPT Token](#use-the-client-credentials-token-and-the-permission-ticket-to-obtain-the-rpt-token)
-      * [Use the RPT token to make authorized calls to client1 (through Kong)](#use-the-rpt-token-to-make-authorized-calls-to-client1-through-kong)
+        * [Request the permission ticket](#request-the-permission-ticket)
+        * [Obtain the Client Credentials Token for "client2"](#obtain-the-client-credentials-token-for-client2)
+        * [Use the Client Credentials Token and the Permission ticket to obtain the RPT Token](#use-the-client-credentials-token-and-the-permission-ticket-to-obtain-the-rpt-token)
+        * [Use the RPT token to make authorized calls to client1 (through Kong)](#use-the-rpt-token-to-make-authorized-calls-to-client1-through-kong)
     * [EnableRoleBasedAuthorization](#enablerolebasedauthorization-1)
       * [Create User example](#create-user-example-1)
       * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2-1)
@@ -353,7 +353,7 @@ For this workflow to work, you will be required to have the following Keycloak c
 #### How to use
 ##### Kong plugin configuration for the RPT workflow 
 ![RPT Workflow configuration](docs/resources/kong_plugin_configuration_for_rpt_workflow.png)
-#### Request the permission ticket
+##### Request the permission ticket
 Any call that doesn't have an active RPT token will return a response that will contain a permission ticket
 
 ```bash
@@ -368,7 +368,7 @@ The response status code will be 401 and the response body will be like in the e
     "permissionTicket": "<permission_ticket>"
 }
 ```
-#### Obtain the Client Credentials Token for "client2"
+##### Obtain the Client Credentials Token for "client2"
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -388,7 +388,7 @@ The response should contain the Client Credentials token (access_token):
 }
 ```
 
-#### Use the Client Credentials Token and the Permission ticket to obtain the RPT Token
+##### Use the Client Credentials Token and the Permission ticket to obtain the RPT Token
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -407,7 +407,7 @@ The response will contain the RPT token that will be used authorize further call
     "not-before-policy": 0
 }
 ```
-#### Use the RPT token to make authorized calls to client1 (through Kong)
+##### Use the RPT token to make authorized calls to client1 (through Kong)
 ```bash
 curl --location 'http://kongHostname:8000/test' \
 --header 'Authorization: Bearer <rpt_token>'
