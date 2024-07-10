@@ -40,9 +40,9 @@
         * [Fetch the access token for the user:](#fetch-the-access-token-for-the-user)
         * [Use the access token to make a request through kong.](#use-the-access-token-to-make-a-request-through-kong-)
     * [EnableRPTAuthorization](#enablerptauthorization-1)
-      * [Create Scope example](#create-scope-example-1)
-      * [Create Resource example](#create-resource-example-1)
-      * [Create Client Policy example](#create-client-policy-example-1)
+      * [Create Scope Example](#create-scope-example-1)
+      * [Create Resource Example](#create-resource-example-1)
+      * [Create Client Policy Example](#create-client-policy-example-1)
       * [Create Permission](#create-permission-1)
       * [How to use](#how-to-use-1)
         * [Kong plugin configuration for the RPT workflow](#kong-plugin-configuration-for-the-rpt-workflow-)
@@ -53,12 +53,13 @@
     * [EnableRoleBasedAuthorization](#enablerolebasedauthorization-1)
       * [Create User example](#create-user-example-1)
       * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2-1)
-    * [Create a new role for client1](#create-a-new-role-for-client1)
-    * [Assign the newly created role to a user](#assign-the-newly-created-role-to-a-user)
+      * [Create a new role for client1](#create-a-new-role-for-client1)
+      * [Assign the newly created role to a user](#assign-the-newly-created-role-to-a-user)
       * [How to use](#how-to-use-2)
         * [Kong plugin configuration for the Role Based Authorization workflow](#kong-plugin-configuration-for-the-role-based-authorization-workflow)
         * [Obtain user access token (for user1, client2)](#obtain-user-access-token-for-user1-client2)
       * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
+  * [Known issues:](#known-issues)
 <!-- TOC -->
 
 ## About
@@ -431,10 +432,10 @@ Set the user password
 #### Create an Audience scope mapper for client2
 ![Audience Scope Mapper](docs/resources/keycloak_audience_scope_mapper.png)
 
-### Create a new role for client1
+#### Create a new role for client1
 ![Create a role](docs/resources/keycloak_create_a_role.png)
 
-### Assign the newly created role to a user
+#### Assign the newly created role to a user
 Role mapping tab for a user:
 ![Role Mapping](docs/resources/keycloak_user_role_mapping_tab.png)
 Assign a role to that user:
