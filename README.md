@@ -81,7 +81,7 @@ While it might work with other versions these are the versions I have tested the
 - Golang: 1.22.4
 - Kong: 3.4.2
 - Konga: 0.14.9
-- Keycloak: 25.0.1
+- Keycloak: 25.0.1 [Docker](https://github.com/eabykov/keycloak-compose)
 
 ## File structure
 
