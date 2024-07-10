@@ -66,6 +66,8 @@
 Kong plugin for Keycloak that manages both authentication and authorization for API requests.
 This document explains how to set up and use the Keycloak Guard plugin with Kong and Konga.
 
+![Plugin configuration via konga](docs/resources/konga_setup.png)
+
 ## Author
 - Name: Mihai Florentin Mihaila
 - Website: https://github.com/mihaiflorentin88
