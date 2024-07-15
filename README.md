@@ -68,10 +68,6 @@ This document explains how to set up and use the Keycloak Guard plugin with Kong
 
 ![Plugin configuration via konga](docs/resources/konga_setup.png)
 
-## Author
-- Name: Mihai Florentin Mihaila
-- Website: https://github.com/mihaiflorentin88
-
 ## Contributors
 - Name: Mihai Florentin Mihaila
 - Website: https://github.com/mihaiflorentin88
