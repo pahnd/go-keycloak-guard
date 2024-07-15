@@ -1,6 +1,5 @@
 <!-- TOC -->
   * [About](#about)
-  * [Author](#author)
   * [Contributors](#contributors)
   * [Requirements](#requirements)
   * [File structure](#file-structure)
