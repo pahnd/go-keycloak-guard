@@ -59,6 +59,14 @@
         * [Obtain user access token (for user1, client2)](#obtain-user-access-token-for-user1-client2)
         * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
   * [Known issues:](#known-issues)
+  * [Luồng hoạt động của hệ thống](#luồng-hoạt-động-của-hệ-thống)
+    * [1. Luồng xác thực cơ bản](#1-luồng-xác-thực-cơ-bản)
+    * [2. Quá trình xác thực với Keycloak](#2-quá-trình-xác-thực-với-keycloak)
+    * [3. Quá trình xác thực nâng cao](#3-quá-trình-xác-thực-nâng-cao)
+    * [4. Luồng xử lý kết quả](#4-luồng-xử-lý-kết-quả)
+    * [5. Cấu hình Keycloak](#5-cấu-hình-keycloak)
+    * [6. Bảo mật](#6-bảo-mật)
+    * [7. Monitoring và Debug](#7-monitoring-và-debug)
 <!-- TOC -->
 
 ## About
@@ -120,7 +128,7 @@ While it might work with other versions these are the versions I have tested the
 
 ### Combined Authorization Workflow
 
-When both authorization methods are enabled, the plugin prioritizes the RPT workflow. Here’s how it operates:
+When both authorization methods are enabled, the plugin prioritizes the RPT workflow. Here's how it operates:
 
 1. Authorization Token Missing or Invalid:
    - The plugin responds with a permission ticket.
@@ -198,7 +206,7 @@ export KONG_PLUGINS="bundled,keycloak-guard"
 
 #### Description
 
-schema.lua is a Lua script used in Kong plugins to define the configuration schema for the plugin. It plays a crucial role in the validation and management of the plugin’s configuration settings. Here’s a concise explanation of its role:
+schema.lua is a Lua script used in Kong plugins to define the configuration schema for the plugin. It plays a crucial role in the validation and management of the plugin's configuration settings. Here's a concise explanation of its role:
 1. Define Configuration Structure: schema.lua specifies the structure of the configuration options that users can set for the plugin. This includes defining fields, their types, default values, and validation rules.
 2. Ensure Validity: It ensures that the configuration provided by the user is valid and meets the expected criteria before the plugin is executed. This validation helps prevent runtime errors due to incorrect configurations.
 3. Integration with Konga: When using Konga, a UI for managing Kong, schema.lua helps Konga understand the configuration options available for the plugin, allowing for a user-friendly interface to set and modify these options.
@@ -211,7 +219,7 @@ schema.lua is a Lua script used in Kong plugins to define the configuration sche
 
 ##### Example Role in Konga:
 
-UI Integration: Enables Konga to dynamically generate forms and input fields based on the plugin’s schema, allowing users to configure the plugin through the Konga interface easily.
+UI Integration: Enables Konga to dynamically generate forms and input fields based on the plugin's schema, allowing users to configure the plugin through the Konga interface easily.
 
 ##### Summary
 In summary, schema.lua is essential for defining, validating, and managing the configuration of Kong plugins, ensuring smooth integration and functionality within both Kong and Konga environments.
@@ -481,3 +489,72 @@ If the user (user1) has the required role (role1) then the plugin will allow you
 
 ## Known issues:
 1. The Konga application will not display the "details" information for the plugin's fields ( This is a issue with Konga not being maintained )
+
+## Luồng hoạt động của hệ thống
+
+### 1. Luồng xác thực cơ bản
+- Khi user gửi request đến một endpoint được bảo vệ bởi Kong Gateway
+- Kong Gateway sẽ chuyển request đến plugin `keycloak-guard`
+- Plugin sẽ kiểm tra token trong header của request
+- Nếu không có token hoặc token không hợp lệ, user sẽ được chuyển hướng đến trang đăng nhập của Keycloak
+
+### 2. Quá trình xác thực với Keycloak
+- User được chuyển hướng đến Keycloak (port 8080)
+- User đăng nhập với tài khoản được cấu hình trong Keycloak
+- Sau khi đăng nhập thành công, Keycloak sẽ:
+  - Tạo JWT token chứa thông tin user
+  - Chuyển hướng user về lại endpoint ban đầu với token
+  - Token này sẽ được sử dụng cho các request tiếp theo
+
+### 3. Quá trình xác thực nâng cao
+Plugin hỗ trợ 3 loại xác thực nâng cao:
+
+#### a. Role-Based Authorization
+- Kiểm tra role của user trong token
+- So sánh với các role được cấu hình trong plugin
+- Chỉ cho phép truy cập nếu user có role phù hợp
+
+#### b. UMA (User-Managed Access)
+- Kiểm tra quyền truy cập tài nguyên
+- Sử dụng RPT (Requesting Party Token)
+- Kiểm tra các permission được cấu hình
+
+#### c. RPT Authorization
+- Kiểm tra RPT token
+- Xác thực các permission được cấp
+- Đảm bảo token còn hiệu lực
+
+### 4. Luồng xử lý kết quả
+- Nếu tất cả các kiểm tra xác thực thành công:
+  - Request được chuyển tiếp đến backend service
+  - Thông tin user được thêm vào header của request
+  - Log được ghi lại cho mục đích audit
+
+- Nếu xác thực thất bại:
+  - Trả về lỗi 401 (Unauthorized) hoặc 403 (Forbidden)
+  - Log chi tiết lý do từ chối truy cập
+  - User có thể được chuyển hướng để đăng nhập lại
+
+### 5. Cấu hình Keycloak
+- Keycloak chạy trên port 8080
+- Sử dụng PostgreSQL làm database
+- Có các tính năng:
+  - Health check
+  - Metrics
+  - Preview features
+- Admin credentials:
+  - Username: admin
+  - Password: admin
+
+### 6. Bảo mật
+- Tất cả giao tiếp giữa các service đều trong mạng nội bộ (kong-network)
+- Keycloak sử dụng HTTPS
+- Token được mã hóa và ký số
+- Có cơ chế refresh token
+- Log đầy đủ cho mục đích audit
+
+### 7. Monitoring và Debug
+- Kong Gateway có log level debug
+- Keycloak có health check endpoint
+- Có thể theo dõi metrics của Keycloak
+- Log được ghi ra stdout/stderr
