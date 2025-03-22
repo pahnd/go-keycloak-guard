@@ -1,64 +1,64 @@
 <!-- TOC -->
-  * [About](#about)
-  * [Contributors](#contributors)
-  * [Requirements](#requirements)
-  * [File structure](#file-structure)
-  * [Authorization Methods Workflow](#authorization-methods-workflow)
+  * [Giới thiệu](#about)
+  * [Người đóng góp](#contributors)
+  * [Yêu cầu](#requirements)
+  * [Cấu trúc thư mục](#file-structure)
+  * [Quy trình Phương thức Phân quyền](#authorization-methods-workflow)
     * [EnableUMAAuthorization](#enableumaauthorization)
     * [EnableRPTAuthorization](#enablerptauthorization)
     * [EnableRoleBasedAuthorization](#enablerolebasedauthorization)
-    * [Combined Authorization Workflow](#combined-authorization-workflow)
-    * [Key Features](#key-features)
-    * [Example Workflow](#example-workflow)
-  * [Installation](#installation)
-    * [Compiling](#compiling)
-    * [ENV Variables required for Kong plugin installation](#env-variables-required-for-kong-plugin-installation)
+    * [Quy trình Phân quyền Kết hợp](#combined-authorization-workflow)
+    * [Tính năng Chính](#key-features)
+    * [Ví dụ Quy trình](#example-workflow)
+  * [Cài đặt](#installation)
+    * [Biên dịch](#compiling)
+    * [Biến Môi trường cần thiết cho cài đặt plugin Kong](#env-variables-required-for-kong-plugin-installation)
     * [schema.lua](#schemalua)
-      * [Description](#description)
-        * [Example Role in Kong:](#example-role-in-kong)
-        * [Example Role in Konga:](#example-role-in-konga)
-        * [Summary](#summary)
-      * [Installation](#installation-1)
-    * [Additional installation examples](#additional-installation-examples)
-    * [Docker - Kong, Konga & the plugin](#docker---kong-konga--the-plugin)
-      * [Examples on how to configure Kong to use the plugin using http requests](#examples-on-how-to-configure-kong-to-use-the-plugin-using-http-requests)
-        * [Create a service](#create-a-service)
-        * [Create a route for that service](#create-a-route-for-that-service)
-        * [Activate the keycloak-guard Plugin for the Service](#activate-the-keycloak-guard-plugin-for-the-service)
-        * [Activate the keycloak-guard Plugin to a Specific Route](#activate-the-keycloak-guard-plugin-to-a-specific-route)
-      * [Examples on how to configure Kong to use the plugin via Konga](#examples-on-how-to-configure-kong-to-use-the-plugin-via-konga)
-  * [Keycloak configuration](#keycloak-configuration)
+      * [Mô tả](#description)
+        * [Ví dụ Vai trò trong Kong:](#example-role-in-kong)
+        * [Ví dụ Vai trò trong Konga:](#example-role-in-konga)
+        * [Tóm tắt](#summary)
+      * [Cài đặt](#installation-1)
+    * [Ví dụ cài đặt bổ sung](#additional-installation-examples)
+    * [Docker - Kong, Konga & plugin](#docker---kong-konga--the-plugin)
+      * [Ví dụ cách cấu hình Kong để sử dụng plugin bằng http requests](#examples-on-how-to-configure-kong-to-use-the-plugin-using-http-requests)
+        * [Tạo service](#create-a-service)
+        * [Tạo route cho service](#create-a-route-for-that-service)
+        * [Kích hoạt plugin keycloak-guard cho Service](#activate-the-keycloak-guard-plugin-for-the-service)
+        * [Kích hoạt plugin keycloak-guard cho Route cụ thể](#activate-the-keycloak-guard-plugin-to-a-specific-route)
+      * [Ví dụ cách cấu hình Kong để sử dụng plugin qua Konga](#examples-on-how-to-configure-kong-to-use-the-plugin-via-konga)
+  * [Cấu hình Keycloak](#keycloak-configuration)
     * [EnableUMAAuthorization](#enableumaauthorization-1)
-      * [Create User example](#create-user-example)
-      * [Create Scope example](#create-scope-example)
-      * [Create Resource example](#create-resource-example)
-      * [Create Client Policy example](#create-client-policy-example)
-      * [Create Permission](#create-permission)
-      * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2)
-      * [How to use](#how-to-use)
-        * [Fetch the access token for the user:](#fetch-the-access-token-for-the-user)
-        * [Use the access token to make a request through kong.](#use-the-access-token-to-make-a-request-through-kong-)
+      * [Ví dụ Tạo User](#create-user-example)
+      * [Ví dụ Tạo Scope](#create-scope-example)
+      * [Ví dụ Tạo Resource](#create-resource-example)
+      * [Ví dụ Tạo Client Policy](#create-client-policy-example)
+      * [Tạo Permission](#create-permission)
+      * [Tạo Audience scope mapper cho client2](#create-an-audience-scope-mapper-for-client2)
+      * [Cách sử dụng](#how-to-use)
+        * [Lấy access token cho user:](#fetch-the-access-token-for-the-user)
+        * [Sử dụng access token để gửi request qua kong.](#use-the-access-token-to-make-a-request-through-kong-)
     * [EnableRPTAuthorization](#enablerptauthorization-1)
-      * [Create Scope Example](#create-scope-example-1)
-      * [Create Resource Example](#create-resource-example-1)
-      * [Create Client Policy Example](#create-client-policy-example-1)
-      * [Create Permission](#create-permission-1)
-      * [How to use](#how-to-use-1)
-        * [Kong plugin configuration for the RPT workflow](#kong-plugin-configuration-for-the-rpt-workflow-)
-        * [Request the permission ticket](#request-the-permission-ticket)
-        * [Obtain the Client Credentials Token for "client2"](#obtain-the-client-credentials-token-for-client2)
-        * [Use the Client Credentials Token and the Permission ticket to obtain the RPT Token](#use-the-client-credentials-token-and-the-permission-ticket-to-obtain-the-rpt-token)
-        * [Use the RPT token to make authorized calls to client1 (through Kong)](#use-the-rpt-token-to-make-authorized-calls-to-client1-through-kong)
+      * [Ví dụ Tạo Scope](#create-scope-example-1)
+      * [Ví dụ Tạo Resource](#create-resource-example-1)
+      * [Ví dụ Tạo Client Policy](#create-client-policy-example-1)
+      * [Tạo Permission](#create-permission-1)
+      * [Cách sử dụng](#how-to-use-1)
+        * [Cấu hình plugin Kong cho quy trình RPT](#kong-plugin-configuration-for-the-rpt-workflow-)
+        * [Yêu cầu permission ticket](#request-the-permission-ticket)
+        * [Lấy Client Credentials Token cho "client2"](#obtain-the-client-credentials-token-for-client2)
+        * [Sử dụng Client Credentials Token và Permission ticket để lấy RPT Token](#use-the-client-credentials-token-and-the-permission-ticket-to-obtain-the-rpt-token)
+        * [Sử dụng RPT token để gọi các API được phân quyền đến client1 (qua Kong)](#use-the-rpt-token-to-make-authorized-calls-to-client1-through-kong)
     * [EnableRoleBasedAuthorization](#enablerolebasedauthorization-1)
-      * [Create User example](#create-user-example-1)
-      * [Create an Audience scope mapper for client2](#create-an-audience-scope-mapper-for-client2-1)
-      * [Create a new role for client1](#create-a-new-role-for-client1)
-      * [Assign the newly created role to a user](#assign-the-newly-created-role-to-a-user)
-      * [How to use](#how-to-use-2)
-        * [Kong plugin configuration for the Role Based Authorization workflow](#kong-plugin-configuration-for-the-role-based-authorization-workflow)
-        * [Obtain user access token (for user1, client2)](#obtain-user-access-token-for-user1-client2)
-        * [Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
-  * [Known issues:](#known-issues)
+      * [Ví dụ Tạo User](#create-user-example-1)
+      * [Tạo Audience scope mapper cho client2](#create-an-audience-scope-mapper-for-client2-1)
+      * [Tạo vai trò mới cho client1](#create-a-new-role-for-client1)
+      * [Gán vai trò mới cho user](#assign-the-newly-created-role-to-a-user)
+      * [Cách sử dụng](#how-to-use-2)
+        * [Cấu hình plugin Kong cho quy trình Phân quyền dựa trên Vai trò](#kong-plugin-configuration-for-the-role-based-authorization-workflow)
+        * [Lấy access token của user (cho user1, client2)](#obtain-user-access-token-for-user1-client2)
+        * [Sử dụng Access token vừa lấy được để gọi các API được phân quyền đến client1 (qua Kong)](#use-the-access-token-that-you-have-just-obtained-to-make-authorized-calls-to-client1-through-kong)
+  * [Các vấn đề đã biết:](#known-issues)
   * [Luồng hoạt động của hệ thống](#luồng-hoạt-động-của-hệ-thống)
     * [1. Luồng xác thực cơ bản](#1-luồng-xác-thực-cơ-bản)
     * [2. Quá trình xác thực với Keycloak](#2-quá-trình-xác-thực-với-keycloak)
@@ -69,76 +69,76 @@
     * [7. Monitoring và Debug](#7-monitoring-và-debug)
 <!-- TOC -->
 
-## About
-Kong plugin for Keycloak that manages both authentication and authorization for API requests.
-This document explains how to set up and use the Keycloak Guard plugin with Kong and Konga.
+## Giới thiệu
+Plugin Kong cho Keycloak quản lý cả xác thực và phân quyền cho các yêu cầu API.
+Tài liệu này giải thích cách thiết lập và sử dụng plugin Keycloak Guard với Kong và Konga.
 
 ![Plugin configuration via konga](docs/resources/konga_setup.png)
 
-## Contributors
-- Name: Mihai Florentin Mihaila
+## Người đóng góp
+- Tên: Mihai Florentin Mihaila
 - Website: https://github.com/mihaiflorentin88
 
-## Requirements
-While it might work with other versions these are the versions I have tested the plugin with:
+## Yêu cầu
+Mặc dù có thể hoạt động với các phiên bản khác, đây là các phiên bản tôi đã thử nghiệm plugin:
 - Golang: 1.22.4
 - Kong: 3.4.2
 - Konga: 0.14.9
 - Keycloak: 25.0.1 [Docker](https://github.com/eabykov/keycloak-compose)
 
-## File structure
+## Cấu trúc thư mục
 
 ```
-├── cmd/ - Contains entry points. Can access both domain and infrastructure components.
-├── docs/ - Documentation resources.
-├── domain/ - Contains domain components with the strict rule of never using external dependencies.
-├── infrastructure/ - Contains logic for external clients like APIs or storage solutions.
-└── port/ - Contains Ports(Interfaces)/DTOs.
+├── cmd/ - Chứa các điểm vào. Có thể truy cập cả các thành phần domain và infrastructure.
+├── docs/ - Tài liệu.
+├── domain/ - Chứa các thành phần domain với quy tắc nghiêm ngặt không sử dụng các phụ thuộc bên ngoài.
+├── infrastructure/ - Chứa logic cho các client bên ngoài như API hoặc giải pháp lưu trữ.
+└── port/ - Chứa Ports(Interfaces)/DTOs.
 ```
 
-## Authorization Methods Workflow
+## Quy trình Phương thức Phân quyền
 ### EnableUMAAuthorization
 
-- This method verifies UMA permissions locally.
-- It requires an access token.
-- It uses the provided Resource(s) and Scope(s) along with a defined Strategy.
-- The Strategy can be affirmative, consensus, or unanimous and is used to determine how permissions are validated.
-- If set to true then the following fields will be made mandatory
-  - EnableAuth: Verifies the Authorization Bearer header
-  - Permissions: List of permissions. You can provide the permissions following this standard: ResourceName#ScopeName
-  - Strategy: you can choose from one of these 3 options Strategy. This option determines how permissions are validated.
+- Phương thức này xác thực quyền UMA cục bộ.
+- Yêu cầu một access token.
+- Sử dụng Resource(s) và Scope(s) được cung cấp cùng với một Chiến lược được định nghĩa.
+- Chiến lược có thể là affirmative, consensus hoặc unanimous và được sử dụng để xác định cách xác thực quyền.
+- Nếu được đặt là true thì các trường sau sẽ trở thành bắt buộc
+  - EnableAuth: Xác thực header Authorization Bearer
+  - Permissions: Danh sách quyền. Bạn có thể cung cấp quyền theo chuẩn này: ResourceName#ScopeName
+  - Strategy: bạn có thể chọn một trong 3 tùy chọn Chiến lược. Tùy chọn này xác định cách xác thực quyền.
 
 ### EnableRPTAuthorization
-- This method utilizes the UMA permission ticket workflow.
-- If the Authorization header is missing in the request, the plugin responds with a permission ticket.
-- The requester must convert this permission ticket into an RPT token, which is then used to gain access to the resource.
-- if set to true then the following options will be made mandatory
-    - EnableAuth: Verifies the Authorization Bearer header
-    - ResourceIDs: List of resource ids. 
+- Phương thức này sử dụng quy trình permission ticket UMA.
+- Nếu header Authorization thiếu trong yêu cầu, plugin sẽ trả lời với một permission ticket.
+- Người yêu cầu phải chuyển đổi permission ticket này thành RPT token, sau đó được sử dụng để truy cập tài nguyên.
+- nếu được đặt là true thì các tùy chọn sau sẽ trở thành bắt buộc
+    - EnableAuth: Xác thực header Authorization Bearer
+    - ResourceIDs: Danh sách ID tài nguyên. 
 
 ### EnableRoleBasedAuthorization
 
-- This method verifies if the user has a specified role.
-- It requires the `Role` field to be specified.
-- It cannot be enabled simultaneously with `EnableRPTAuthorization` or `EnableUMAAuthorization`.
-- If set to true, the following fields will be made mandatory:
-    - EnableAuth: Verifies the Authorization Bearer header
-    - Role: The required role the user must have
+- Phương thức này xác thực xem user có vai trò được chỉ định hay không.
+- Yêu cầu trường `Role` phải được chỉ định.
+- Không thể được kích hoạt đồng thời với `EnableRPTAuthorization` hoặc `EnableUMAAuthorization`.
+- Nếu được đặt là true, các trường sau sẽ trở thành bắt buộc:
+    - EnableAuth: Xác thực header Authorization Bearer
+    - Role: Vai trò bắt buộc mà user phải có
 
 
-### Combined Authorization Workflow
+### Quy trình Phân quyền Kết hợp
 
-When both authorization methods are enabled, the plugin prioritizes the RPT workflow. Here's how it operates:
+Khi cả hai phương thức phân quyền được kích hoạt, plugin ưu tiên quy trình RPT. Đây là cách nó hoạt động:
 
-1. Authorization Token Missing or Invalid:
-   - The plugin responds with a permission ticket.
-   - The client can exchange this permission ticket for an RPT token using the Keycloak Authorization API or use an access token that has the correct permissions.
-2. Authorization Header Present:
-   - The plugin checks the validity of the access token in the Authorization header.
-   - If the access token is valid, it verifies whether the token is an RPT.
-   - If the token is not an RPT, the plugin falls back to the UMA Authorization workflow to validate the permissions based on the predefined Resource(s), Scope(s), and Strategy.
+1. Token Phân quyền Thiếu hoặc Không hợp lệ:
+   - Plugin trả lời với một permission ticket.
+   - Client có thể trao đổi permission ticket này để lấy RPT token bằng cách sử dụng Keycloak Authorization API hoặc sử dụng access token có quyền phù hợp.
+2. Header Phân quyền Hiện diện:
+   - Plugin kiểm tra tính hợp lệ của access token trong header Authorization.
+   - Nếu access token hợp lệ, nó xác thực xem token có phải là RPT hay không.
+   - Nếu token không phải là RPT, plugin chuyển sang quy trình Phân quyền UMA để xác thực quyền dựa trên Resource(s), Scope(s) và Chiến lược được định nghĩa trước.
 
-This is an example for the response body that will be returned if the Authorization Bearer header is missing or invalid:
+Đây là ví dụ về response body sẽ được trả về nếu header Authorization Bearer thiếu hoặc không hợp lệ:
 ```json
 {
     "message": "The request is missing the Requesting Party Token (RPT). Please obtain an RPT using the provided permission ticket.",
@@ -147,31 +147,31 @@ This is an example for the response body that will be returned if the Authorizat
 }
 ```
 
-If the permissionTicket key is present in the response then the requester has to generate an RPT. Or if the EnableUMAAuthorization is turned on then the requester can also provide a valid access token.
-The RPT will have to be provided as an Authorization Bearer header.
+Nếu key permissionTicket hiện diện trong response thì người yêu cầu phải tạo RPT. Hoặc nếu EnableUMAAuthorization được bật thì người yêu cầu cũng có thể cung cấp một access token hợp lệ.
+RPT sẽ phải được cung cấp dưới dạng header Authorization Bearer.
 
-### Key Features
+### Tính năng Chính
 
-- Priority Handling: Prioritizes the RPT workflow when both methods are enabled, ensuring that clients without valid tokens receive a permission ticket for dynamic access control.
-- Fallback Mechanism: Uses UMA Authorization as a fallback to validate non-RPT tokens, ensuring comprehensive access control management.
-- Seamless Integration: Integrates both authorization methods seamlessly to provide flexible and robust security mechanisms.
+- Xử lý Ưu tiên: Ưu tiên quy trình RPT khi cả hai phương thức được kích hoạt, đảm bảo rằng các client không có token hợp lệ nhận được permission ticket để kiểm soát truy cập động.
+- Cơ chế Fallback: Sử dụng Phân quyền UMA làm fallback để xác thực các token không phải RPT, đảm bảo quản lý kiểm soát truy cập toàn diện.
+- Tích hợp Liền mạch: Tích hợp cả hai phương thức phân quyền một cách liền mạch để cung cấp cơ chế bảo mật linh hoạt và mạnh mẽ.
 
-### Example Workflow
-1. Request without Authorization Token:
-   - The client receives a permission ticket in the response.
-   - The client must convert this ticket into an RPT token to access the resource.
-2. Request with Valid Access Token:
-   - The plugin introspects the token to check its validity and type.
-   - If the token is not an RPT, the UMA Authorization workflow is used to validate permissions.
+### Ví dụ Quy trình
+1. Yêu cầu không có Token Phân quyền:
+   - Client nhận được permission ticket trong response.
+   - Client phải chuyển đổi ticket này thành RPT token để truy cập tài nguyên.
+2. Yêu cầu với Access Token Hợp lệ:
+   - Plugin kiểm tra token để xác thực tính hợp lệ và loại của nó.
+   - Nếu token không phải là RPT, quy trình Phân quyền UMA được sử dụng để xác thực quyền.
 
-## Installation
-### Compiling
+## Cài đặt
+### Biên dịch
 ```bash
-make compile # This only works if you have golang 1.22.4 installed on your system
-make docker-compile # This uses a docker container to compile the binary
+make compile # Chỉ hoạt động nếu bạn đã cài đặt golang 1.22.4 trên hệ thống
+make docker-compile # Sử dụng container docker để biên dịch binary
 ```
-By default, it compiles for linux on amd64 architecture.
-If you wish to compile for other platforms or architectures use one of the commands below (requires golang 1.22.4 installed) or you can modify the Makefile and use docker to compile it
+Theo mặc định, nó biên dịch cho linux trên kiến trúc amd64.
+Nếu bạn muốn biên dịch cho các nền tảng hoặc kiến trúc khác, sử dụng một trong các lệnh dưới đây (yêu cầu cài đặt golang 1.22.4) hoặc bạn có thể sửa đổi Makefile và sử dụng docker để biên dịch
 ```bash
 # Windows x86 64 bit
 go mod tidy && GOOS=windows GOARCH=amd64 go build -o bin//keycloak-guard-windows-amd64.exe main.go
@@ -191,9 +191,9 @@ go mod tidy && GOOS=linux GOARCH=amd64 go build -o bin//keycloak-guard-linux-amd
 go mod tidy && GOOS=linux GOARCH=arm64 go build -o bin//keycloak-guard-linux-arm64 main.go
 ```
 
-### ENV Variables required for Kong plugin installation
+### Biến Môi trường cần thiết cho cài đặt plugin Kong
 ```bash
-# This assumes that the name of your binary is keycloak-guard
+# Giả định rằng tên binary của bạn là keycloak-guard
 export KONG_PLUGINSERVER_NAMES="keycloak-guard"
 export KONG_PLUGINSERVER_KEYCLOAK_GUARD_START_CMD="/usr/bin/keycloak-guard -kong-prefix /tmp"
 export KONG_PLUGINSERVER_KEYCLOAK_GUARD_QUERY_CMD="/usr/bin/keycloak-guard -dump"
@@ -204,53 +204,53 @@ export KONG_PLUGINS="bundled,keycloak-guard"
 
 ### schema.lua
 
-#### Description
+#### Mô tả
 
-schema.lua is a Lua script used in Kong plugins to define the configuration schema for the plugin. It plays a crucial role in the validation and management of the plugin's configuration settings. Here's a concise explanation of its role:
-1. Define Configuration Structure: schema.lua specifies the structure of the configuration options that users can set for the plugin. This includes defining fields, their types, default values, and validation rules.
-2. Ensure Validity: It ensures that the configuration provided by the user is valid and meets the expected criteria before the plugin is executed. This validation helps prevent runtime errors due to incorrect configurations.
-3. Integration with Konga: When using Konga, a UI for managing Kong, schema.lua helps Konga understand the configuration options available for the plugin, allowing for a user-friendly interface to set and modify these options.
+schema.lua là một script Lua được sử dụng trong các plugin Kong để định nghĩa schema cấu hình cho plugin. Nó đóng vai trò quan trọng trong việc xác thực và quản lý cài đặt cấu hình của plugin. Đây là giải thích ngắn gọn về vai trò của nó:
+1. Định nghĩa Cấu trúc Cấu hình: schema.lua chỉ định cấu trúc của các tùy chọn cấu hình mà người dùng có thể đặt cho plugin. Điều này bao gồm việc định nghĩa các trường, kiểu dữ liệu của chúng, giá trị mặc định và quy tắc xác thực.
+2. Đảm bảo Tính hợp lệ: Nó đảm bảo rằng cấu hình được cung cấp bởi người dùng là hợp lệ và đáp ứng các tiêu chí mong đợi trước khi plugin được thực thi. Việc xác thực này giúp ngăn chặn lỗi runtime do cấu hình không chính xác.
+3. Tích hợp với Konga: Khi sử dụng Konga, một giao diện người dùng để quản lý Kong, schema.lua giúp Konga hiểu các tùy chọn cấu hình có sẵn cho plugin, cho phép giao diện thân thiện với người dùng để thiết lập và sửa đổi các tùy chọn này.
 
-##### Example Role in Kong:
+##### Ví dụ Vai trò trong Kong:
 
-1. Field Definitions: Specifies fields such as api_key, timeout, and their respective data types (string, number, etc.).
-2. Validation: Enforces rules like required fields, field length, and acceptable value ranges.
-3. Defaults: Provides default values for configuration settings if the user does not specify them.
+1. Định nghĩa Trường: Chỉ định các trường như api_key, timeout và kiểu dữ liệu tương ứng của chúng (string, number, v.v.).
+2. Xác thực: Thực thi các quy tắc như trường bắt buộc, độ dài trường và phạm vi giá trị chấp nhận được.
+3. Giá trị Mặc định: Cung cấp giá trị mặc định cho cài đặt cấu hình nếu người dùng không chỉ định chúng.
 
-##### Example Role in Konga:
+##### Ví dụ Vai trò trong Konga:
 
-UI Integration: Enables Konga to dynamically generate forms and input fields based on the plugin's schema, allowing users to configure the plugin through the Konga interface easily.
+Tích hợp Giao diện Người dùng: Cho phép Konga tạo động các biểu mẫu và trường nhập liệu dựa trên schema của plugin, cho phép người dùng cấu hình plugin thông qua giao diện Konga một cách dễ dàng.
 
-##### Summary
-In summary, schema.lua is essential for defining, validating, and managing the configuration of Kong plugins, ensuring smooth integration and functionality within both Kong and Konga environments.
+##### Tóm tắt
+Tóm lại, schema.lua là cần thiết để định nghĩa, xác thực và quản lý cấu hình của các plugin Kong, đảm bảo tích hợp và hoạt động mượt mà trong cả môi trường Kong và Konga.
 
-#### Installation
-Copy the schema.lua file from the repository root to this path: ```/usr/local/share/lua/5.1/kong/plugins/keycloak-guard/schema.lua```
+#### Cài đặt
+Sao chép file schema.lua từ thư mục gốc của repository đến đường dẫn này: ```/usr/local/share/lua/5.1/kong/plugins/keycloak-guard/schema.lua```
 
-### Additional installation examples
-You can find more examples on how to setup the plugin and the [schema.lua](./schema.lua) inside the [docker-compose.yaml](./docker-compose.yaml) file.
+### Ví dụ cài đặt bổ sung
+Bạn có thể tìm thêm ví dụ về cách thiết lập plugin và [schema.lua](./schema.lua) trong file [docker-compose.yaml](./docker-compose.yaml).
 
-### Docker - Kong, Konga & the plugin
-The repository includes a [docker-compose.yaml](./docker-compose.yaml) file that sets up a fully functional environment with Kong, Konga, and the custom plugin installed. To manage these services, you can use the provided Makefile commands:
+### Docker - Kong, Konga & plugin
+Repository bao gồm file [docker-compose.yaml](./docker-compose.yaml) thiết lập môi trường hoàn chỉnh với Kong, Konga và plugin tùy chỉnh được cài đặt. Để quản lý các service này, bạn có thể sử dụng các lệnh Makefile được cung cấp:
 ```bash
-make kong-start # Start the Kong and Konga containers
-make kong-stop # Stop the Kong and Konga containers
-make docker-clean-up # Stop the containers, remove all images and networks
+make kong-start # Khởi động các container Kong và Konga
+make kong-stop # Dừng các container Kong và Konga
+make docker-clean-up # Dừng các container, xóa tất cả images và networks
 ```
-#### Examples on how to configure Kong to use the plugin using http requests
-To create a service, add a route, and assign the keycloak-guard plugin in Kong, you can use the following curl commands:
-##### Create a service
+#### Ví dụ cách cấu hình Kong để sử dụng plugin bằng http requests
+Để tạo service, thêm route và gán plugin keycloak-guard trong Kong, bạn có thể sử dụng các lệnh curl sau:
+##### Tạo service
 ```bash
 curl -i -X POST http://localhost:8001/services/ \
   --data name=example-service \
   --data url=http://your.service
 ```
-##### Create a route for that service
+##### Tạo route cho service
 ```bash
 curl -i -X POST http://localhost:8001/services/example-service/routes \
   --data 'paths[]=/example'
 ```
-##### Activate the keycloak-guard Plugin for the Service
+##### Kích hoạt plugin keycloak-guard cho Service
 ```bash
 curl -i -X POST http://localhost:8001/services/example-service/plugins \
   --data name=keycloak-guard \
@@ -258,18 +258,18 @@ curl -i -X POST http://localhost:8001/services/example-service/plugins \
   --data config.Realm=your-realm \
   --data config.ClientID=your-client-id \
   --data config.ClientSecret=your-client-secret \
-  --data config.EnableAuth=true \ # Optional if EnableUMAAuthorization and EnableRPTAuthorization are set to false 
-  --data config.EnableUMAAuthorization=true \ # Optional
-  --data config.Permissions[]=resouceName#exampleScope \ # Optional if EnableUMAAuthorization is set to false
-  --data config.Strategy=affirmative \ # Optional if EnableUMAAuthorization is set to false
-  --data config.EnableRPTAuthorization=true \ # Optional
-  --data config.ResourceIDs[]=resource-id-1 \ # Optional if EnableRPTAuthorization is set to false
-  --data config.ResourceIDs[]=resource-id-2 # # Optional if EnableRPTAuthorization is set to false
-  --data config.EnableRoleBasedAuthorization=true # Optional if EnableRoleBasedAuthorization is set to true then EnableAuth has to be set to true and a Role has to be added. Also both EnableUMAAuthorization and EnableRPTAuthorization need to be set to false
-  --data config.Role=role1 # Optional requires EnableRoleBasedAuthorization to be set to true
+  --data config.EnableAuth=true \ # Tùy chọn nếu EnableUMAAuthorization và EnableRPTAuthorization được đặt là false 
+  --data config.EnableUMAAuthorization=true \ # Tùy chọn
+  --data config.Permissions[]=resouceName#exampleScope \ # Tùy chọn nếu EnableUMAAuthorization được đặt là false
+  --data config.Strategy=affirmative \ # Tùy chọn nếu EnableUMAAuthorization được đặt là false
+  --data config.EnableRPTAuthorization=true \ # Tùy chọn
+  --data config.ResourceIDs[]=resource-id-1 \ # Tùy chọn nếu EnableRPTAuthorization được đặt là false
+  --data config.ResourceIDs[]=resource-id-2 # # Tùy chọn nếu EnableRPTAuthorization được đặt là false
+  --data config.EnableRoleBasedAuthorization=true # Tùy chọn nếu EnableRoleBasedAuthorization được đặt là true thì EnableAuth phải được đặt là true và Role phải được thêm vào. Đồng thời cả EnableUMAAuthorization và EnableRPTAuthorization phải được đặt là false
+  --data config.Role=role1 # Tùy chọn yêu cầu EnableRoleBasedAuthorization được đặt là true
 ```
 
-##### Activate the keycloak-guard Plugin to a Specific Route
+##### Kích hoạt plugin keycloak-guard cho Route cụ thể
 ```bash
 curl -i -X POST http://localhost:8001/routes/{route_id}/plugins \
   --data name=keycloak-guard \
@@ -277,51 +277,51 @@ curl -i -X POST http://localhost:8001/routes/{route_id}/plugins \
   --data config.Realm=your-realm \
   --data config.ClientID=your-client-id \
   --data config.ClientSecret=your-client-secret \
-  --data config.EnableAuth=true \ # Optional if EnableUMAAuthorization and EnableRPTAuthorization are set to false 
-  --data config.EnableUMAAuthorization=true \ # Optional
-  --data config.Permissions[]=resouceName#exampleScope \ # Optional if EnableUMAAuthorization is set to false
-  --data config.Strategy=affirmative \ # Optional if EnableUMAAuthorization is set to false
-  --data config.EnableRPTAuthorization=true \ # Optional
-  --data config.ResourceIDs[]=resource-id-1 \ # Optional if EnableRPTAuthorization is set to false
-  --data config.ResourceIDs[]=resource-id-2 # # Optional if EnableRPTAuthorization is set to false
-  --data config.EnableRoleBasedAuthorization=true # Optional if EnableRoleBasedAuthorization is set to true then EnableAuth has to be set to true and a Role has to be added. Also both EnableUMAAuthorization and EnableRPTAuthorization need to be set to false
-  --data config.Role=role1 # Optional requires EnableRoleBasedAuthorization to be set to true
+  --data config.EnableAuth=true \ # Tùy chọn nếu EnableUMAAuthorization và EnableRPTAuthorization được đặt là false 
+  --data config.EnableUMAAuthorization=true \ # Tùy chọn
+  --data config.Permissions[]=resouceName#exampleScope \ # Tùy chọn nếu EnableUMAAuthorization được đặt là false
+  --data config.Strategy=affirmative \ # Tùy chọn nếu EnableUMAAuthorization được đặt là false
+  --data config.EnableRPTAuthorization=true \ # Tùy chọn
+  --data config.ResourceIDs[]=resource-id-1 \ # Tùy chọn nếu EnableRPTAuthorization được đặt là false
+  --data config.ResourceIDs[]=resource-id-2 # # Tùy chọn nếu EnableRPTAuthorization được đặt là false
+  --data config.EnableRoleBasedAuthorization=true # Tùy chọn nếu EnableRoleBasedAuthorization được đặt là true thì EnableAuth phải được đặt là true và Role phải được thêm vào. Đồng thời cả EnableUMAAuthorization và EnableRPTAuthorization phải được đặt là false
+  --data config.Role=role1 # Tùy chọn yêu cầu EnableRoleBasedAuthorization được đặt là true
 ```
-#### Examples on how to configure Kong to use the plugin via Konga
-This [screenshot](docs/resources/konga_setup.png) contains an example on how to setup the plugin via Konga with all features toggled on.
+#### Ví dụ cách cấu hình Kong để sử dụng plugin qua Konga
+[Ảnh chụp màn hình](docs/resources/konga_setup.png) này chứa ví dụ về cách thiết lập plugin qua Konga với tất cả các tính năng được bật.
 ![Plugin configuration via konga](docs/resources/konga_setup.png)
 
-## Keycloak configuration
-I will be using "client1" and "client2" in my examples. "client2" will be the client sending the requests to client1
+## Cấu hình Keycloak
+Tôi sẽ sử dụng "client1" và "client2" trong các ví dụ của tôi. "client2" sẽ là client gửi các yêu cầu đến client1
 ### EnableUMAAuthorization
-For this workflow to work, you will be required to have the following Keycloak configuration:
+Để quy trình này hoạt động, bạn sẽ cần có cấu hình Keycloak sau:
 1. **client2:**
-   - create an audience scope mapper
+   - tạo audience scope mapper
 2. **Realm:**
-   - create an active user or use an existing one.
+   - tạo user đang hoạt động hoặc sử dụng user hiện có.
 3. **client1:**
-   - a new scope
-   - a new resource
-   - a new client policy 
-   - a new permission 
+   - một scope mới
+   - một resource mới
+   - một client policy mới 
+   - một permission mới 
 
-#### Create User example
-Create the user:
+#### Ví dụ Tạo User
+Tạo user:
 ![Create user](docs/resources/keycloak_create_user.png)
-Set the user password
+Đặt mật khẩu user
 ![Set user password](docs/resources/keycloak_set_user_password.png)
-#### Create Scope example
+#### Ví dụ Tạo Scope
 ![Create Scope](docs/resources/keycloak_create_scope.png)
-#### Create Resource example
+#### Ví dụ Tạo Resource
 ![Create Resource](docs/resources/keycloak_create_resource.png)
-#### Create Client Policy example
+#### Ví dụ Tạo Client Policy
 ![Create Client Policy](docs/resources/keycloak_create_client_policy.png)
-#### Create Permission
+#### Tạo Permission
 ![Create Permission](docs/resources/keycloak_create_permission.png)
-#### Create an Audience scope mapper for client2
+#### Tạo Audience scope mapper cho client2
 ![Audience Scope Mapper](docs/resources/keycloak_audience_scope_mapper.png)
-#### How to use
-##### Fetch the access token for the user:
+#### Cách sử dụng
+##### Lấy access token cho user:
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -331,41 +331,41 @@ curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/toke
 --data-urlencode 'password=userpassword' \
 --data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
 ```
-##### Use the access token to make a request through kong. 
-The keycloak-gateway plugin has to be enabled and configured for this workflow.
+##### Sử dụng access token để gửi request qua kong. 
+Plugin keycloak-gateway phải được kích hoạt và cấu hình cho quy trình này.
 ![UMA Authorization workflow plugin configuration](docs/resources/kong_plugin_configuration_for_uma_workflow.png)
-For more detailed setup and usage instructions, refer to the [Additional installation examples](#additional-installation-examples) section.
+Để biết thêm chi tiết về thiết lập và hướng dẫn sử dụng, tham khảo phần [Ví dụ cài đặt bổ sung](#additional-installation-examples).
 ```bash
 curl --location 'http://kong-hostname:8000/test' \
 --header 'Authorization: Bearer <accessToken>'
 ```
 ### EnableRPTAuthorization
-For this workflow to work, you will be required to have the following Keycloak configuration:
+Để quy trình này hoạt động, bạn sẽ cần có cấu hình Keycloak sau:
 1. **client1:**
-   - a new scope
-   - a new resource
-   - a new client policy
-   - a new permission
+   - một scope mới
+   - một resource mới
+   - một client policy mới
+   - một permission mới
 
-#### Create Scope Example
+#### Ví dụ Tạo Scope
 ![Create Scope](docs/resources/keycloak_create_scope.png)
-#### Create Resource Example
+#### Ví dụ Tạo Resource
 ![Create Resource](docs/resources/keycloak_create_resource.png)
-#### Create Client Policy Example
+#### Ví dụ Tạo Client Policy
 ![Create Client Policy](docs/resources/keycloak_create_client_policy.png)
-#### Create Permission
+#### Tạo Permission
 ![Create Permission](docs/resources/keycloak_create_permission.png)
-#### How to use
-##### Kong plugin configuration for the RPT workflow 
+#### Cách sử dụng
+##### Cấu hình plugin Kong cho quy trình RPT 
 ![RPT Workflow configuration](docs/resources/kong_plugin_configuration_for_rpt_workflow.png)
-##### Request the permission ticket
-Any call that doesn't have an active RPT token will return a response that will contain a permission ticket
+##### Yêu cầu permission ticket
+Bất kỳ cuộc gọi nào không có RPT token đang hoạt động sẽ trả về response chứa permission ticket
 
 ```bash
 curl --location 'http://kongHostname:8000/test'
 ```
 
-The response status code will be 401 and the response body will be like in the example below:
+Response status code sẽ là 401 và response body sẽ như trong ví dụ dưới đây:
 ```json
 {
     "message": "The request is missing the Requesting Party Token (RPT). Please obtain an RPT using the provided permission ticket.",
@@ -373,7 +373,7 @@ The response status code will be 401 and the response body will be like in the e
     "permissionTicket": "<permission_ticket>"
 }
 ```
-##### Obtain the Client Credentials Token for "client2"
+##### Lấy Client Credentials Token cho "client2"
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -381,7 +381,7 @@ curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/toke
 --data-urlencode 'client_id=client2' \
 --data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
 ```
-The response should contain the Client Credentials token (access_token):
+Response sẽ chứa Client Credentials token (access_token):
 ```json
 {
     "access_token": "<client_credentials_token>",
@@ -393,7 +393,7 @@ The response should contain the Client Credentials token (access_token):
 }
 ```
 
-##### Use the Client Credentials Token and the Permission ticket to obtain the RPT Token
+##### Sử dụng Client Credentials Token và Permission ticket để lấy RPT Token
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -401,7 +401,7 @@ curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/toke
 --data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:uma-ticket' \
 --data-urlencode 'ticket=<permission_ticket>'
 ```
-The response will contain the RPT token that will be used authorize further calls to our application (through kong).
+Response sẽ chứa RPT token sẽ được sử dụng để phân quyền các cuộc gọi tiếp theo đến ứng dụng của chúng ta (qua kong).
 ```json
 {
     "upgraded": false,
@@ -412,50 +412,50 @@ The response will contain the RPT token that will be used authorize further call
     "not-before-policy": 0
 }
 ```
-##### Use the RPT token to make authorized calls to client1 (through Kong)
+##### Sử dụng RPT token để gọi các API được phân quyền đến client1 (qua Kong)
 ```bash
 curl --location 'http://kongHostname:8000/test' \
 --header 'Authorization: Bearer <rpt_token>'
 ```
 
 ### EnableRoleBasedAuthorization
-For this workflow to work, you will be required to have the following Keycloak configuration:
+Để quy trình này hoạt động, bạn sẽ cần có cấu hình Keycloak sau:
 1. **Realm:**
-   - create an active user or use an existing one.
+   - tạo user đang hoạt động hoặc sử dụng user hiện có.
 2. **client1:**
-   - create a new role
-   - assign the new role to a username
+   - tạo vai trò mới
+   - gán vai trò mới cho username
 3. **client2:**
-   - create an audience scope mapper
+   - tạo audience scope mapper
 
-#### Create User example
-Create the user:
+#### Ví dụ Tạo User
+Tạo user:
 ![Create user](docs/resources/keycloak_create_user.png)
-Set the user password
+Đặt mật khẩu user
 ![Set user password](docs/resources/keycloak_set_user_password.png)
 
-#### Create an Audience scope mapper for client2
+#### Tạo Audience scope mapper cho client2
 ![Audience Scope Mapper](docs/resources/keycloak_audience_scope_mapper.png)
 
-#### Create a new role for client1
+#### Tạo vai trò mới cho client1
 ![Create a role](docs/resources/keycloak_create_a_role.png)
 
-#### Assign the newly created role to a user
-Role mapping tab for a user:
+#### Gán vai trò mới cho user
+Tab ánh xạ vai trò cho user:
 ![Role Mapping](docs/resources/keycloak_user_role_mapping_tab.png)
-Assign a role to that user:
+Gán vai trò cho user đó:
 ![Role Mapping](docs/resources/keycloak_assign_role_to_user.png)
 
-#### How to use
-##### Kong plugin configuration for the Role Based Authorization workflow
-- EnableAuth has to be enabled
-- EnableUMAAuthorization has to be disabled
-- EnableRPTAuthorization has to be disabled
-- EnableRoleBasedAuthorization has to be enabled
-- Role (field) has to contain the name for the role you want to allow access for (role1)
+#### Cách sử dụng
+##### Cấu hình plugin Kong cho quy trình Phân quyền dựa trên Vai trò
+- EnableAuth phải được bật
+- EnableUMAAuthorization phải được tắt
+- EnableRPTAuthorization phải được tắt
+- EnableRoleBasedAuthorization phải được bật
+- Role (trường) phải chứa tên cho vai trò bạn muốn cho phép truy cập (role1)
 ![Kong Role Based CFG](docs/resources/kong_plugin_configuration_for_role_based_workflow.png)
 
-##### Obtain user access token (for user1, client2)
+##### Lấy access token của user (cho user1, client2)
 ```bash
 curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -465,7 +465,7 @@ curl --location 'http://keycloak-url/realms/<realm>/protocol/openid-connect/toke
 --data-urlencode 'password=userpassword' \
 --data-urlencode 'client_secret=YOie4lyoXakCXDuP7jRCsUM4Xx4OxUOB'
 ```
-The response will contain the access token:
+Response sẽ chứa access token:
 ```json
 {
     "access_token": "<access_token>",
@@ -479,16 +479,16 @@ The response will contain the access token:
 }
 ```
 
-##### Use the Access token that you have just obtained to make authorized calls to client1 (through Kong)
+##### Sử dụng Access token vừa lấy được để gọi các API được phân quyền đến client1 (qua Kong)
 
 ```bash
 curl --location 'http://kongHostname:8000/test' \
 --header 'Authorization: Bearer <access_token>'
 ```
-If the user (user1) has the required role (role1) then the plugin will allow you to make the request.
+Nếu user (user1) có vai trò yêu cầu (role1) thì plugin sẽ cho phép bạn thực hiện yêu cầu.
 
-## Known issues:
-1. The Konga application will not display the "details" information for the plugin's fields ( This is a issue with Konga not being maintained )
+## Các vấn đề đã biết:
+1. Ứng dụng Konga sẽ không hiển thị thông tin "details" cho các trường của plugin (Đây là vấn đề với Konga không được duy trì)
 
 ## Luồng hoạt động của hệ thống
 
